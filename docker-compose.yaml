@@ -37,7 +37,7 @@ services:
     ports:
       - "3000:3000"
 
- doc2md:
+  doc2md:   # <-- agora certinho!
     image: felipefontoura/doc2md:latest
     networks:
       - network_public
