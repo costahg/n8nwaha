@@ -37,7 +37,36 @@ services:
     ports:
       - "3000:3000"
 
+  doc2md:
+    image: felipefontoura/doc2md:latest
+    networks:
+      - network_public
+    environment:
+      - OPENAI_API_KEY=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
+      - LLM_MODEL=gpt-4o-mini
+      - WORKERS=4
+      - TIMEOUT=0
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.doc2md.rule=Host(`api.doc2md.website.com`)
+        - traefik.http.routers.doc2md.entrypoints=websecure
+        - traefik.http.routers.doc2md.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.doc2md.priority=1
+        - traefik.http.routers.doc2md.service=doc2md
+        - traefik.http.services.doc2md.loadbalancer.server.port=5000
+        - traefik.http.services.doc2md.loadbalancer.passHostHeader=true
+
 volumes:
   n8n_data:
   waha_sessions:
   waha_media:
+
+networks:
+  network_public:
+    external: true
