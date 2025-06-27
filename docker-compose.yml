@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  n8n:
+    build: .
+    platform: linux/amd64
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: 'postgres://postgres:bl6J4b1wRDylAkM83V3XHiHiZA6S7mZR23D6fjCgZ8yvKWEWXU0N3F6E0bZ3tvTv@g8c4cg0gwgg0c4k44cookc4w:5432/postgres'
+      DB_POSTGRESDB_PORT: '5432'
+      DB_POSTGRESDB_DATABASE: 'postgres'
+      DB_POSTGRESDB_USER: 'postgres'
+      DB_POSTGRESDB_PASSWORD: 'bl6J4b1wRDylAkM83V3XHiHiZA6S7mZR23D6fjCgZ8yvKWEWXU0N3F6E0bZ3tvTv'
+      QUEUE_BULL_REDIS_HOST: 'redis://default:zkD009TsK6jboA14Y0UsfpFFChs8uCoevx5kVWP1PXhmwGhC6nArd0pWbcF7SxQg@hswcggo40gs04wc0wo0o0gsg:6379/0'
+      QUEUE_BULL_REDIS_PORT: '6379'
+      QUEUE_BULL_REDIS_PASSWORD: 'zkD009TsK6jboA14Y0UsfpFFChs8uCoevx5kVWP1PXhmwGhC6nArd0pWbcF7SxQg'
+      N8N_HOST: n8.lizapeproprio.shop
+      WEBHOOK_URL: 'https://n8.lizapeproprio.shop'
+      N8N_LOG_LEVEL: debug
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: true
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./temp:/home/node/temp
+      - ./waha_media/default:/home/node/waha_media/default
+    ports:
+      - '5678:5678'
+
+  waha:
+    image: devlikeapro/waha:latest
+    platform: linux/amd64
+    environment:
+      # Adapte os ENV do waha para usar o Redis do Coolify, se precisar
+      WHATSAPP_HOOK_URL: http://n8n:5678/webhook/webhook
+      WHATSAPP_DEFAULT_ENGINE: GOWS
+      WHATSAPP_HOOK_EVENTS: message
+      # Exemplo se precisar conectar ao Redis:
+      # REDIS_HOST: 'redis'
+      # REDIS_PORT: '6379'
+      # REDIS_PASSWORD: 'zkD009TsK6jboA14Y0UsfpFFChs8uCoevx5kVWP1PXhmwGhC6nArd0pWbcF7SxQg'
+    volumes:
+      - waha_sessions:/app/.sessions
+      - ./waha_media:/tmp/whatsapp-files 
+    ports:
+      - "3000:3000"
+
+volumes:
+  n8n_data:
+  waha_sessions:
+  waha_media:
