@@ -37,10 +37,8 @@ services:
     ports:
       - "3000:3000"
 
-  doc2md:   # <-- agora certinho!
+  doc2md:
     image: felipefontoura/doc2md:latest
-    networks:
-      - network_public
     environment:
       - OPENAI_API_KEY=${DOC2MD_OPENAI_API_KEY}
       - LLM_MODEL=${DOC2MD_LLM_MODEL}
@@ -66,7 +64,3 @@ volumes:
   n8n_data:
   waha_sessions:
   waha_media:
-
-networks:
-  network_public:
-    external: true
