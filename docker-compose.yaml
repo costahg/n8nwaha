@@ -2,41 +2,63 @@ services:
   n8n:
     build: .
     platform: linux/amd64
+    restart: unless-stopped
     environment:
+      # Banco e Redis
       DB_TYPE: postgresdb
-      DB_POSTGRESDB_HOST: '${DB_POSTGRESDB_HOST}'
-      DB_POSTGRESDB_PORT: '${DB_POSTGRESDB_PORT}'
-      DB_POSTGRESDB_DATABASE: '${DB_POSTGRESDB_DATABASE}'
-      DB_POSTGRESDB_USER: '${DB_POSTGRESDB_USER}'
-      DB_POSTGRESDB_PASSWORD: '${DB_POSTGRESDB_PASSWORD}'
-      QUEUE_BULL_REDIS_HOST: '${QUEUE_BULL_REDIS_HOST}'
-      QUEUE_BULL_REDIS_PORT: '${QUEUE_BULL_REDIS_PORT}'
-      QUEUE_BULL_REDIS_PASSWORD: '${QUEUE_BULL_REDIS_PASSWORD}'
-      N8N_HOST: '${N8N_HOST}'
-      WEBHOOK_URL: '${WEBHOOK_URL}'
-      N8N_LOG_LEVEL: '${N8N_LOG_LEVEL}'
-      GENERIC_TIMEZONE: '${GENERIC_TIMEZONE}'
-      N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: '${N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE}'
+      DB_POSTGRESDB_HOST: "${DB_POSTGRESDB_HOST}"
+      DB_POSTGRESDB_PORT: "${DB_POSTGRESDB_PORT}"
+      DB_POSTGRESDB_DATABASE: "${DB_POSTGRESDB_DATABASE}"
+      DB_POSTGRESDB_USER: "${DB_POSTGRESDB_USER}"
+      DB_POSTGRESDB_PASSWORD: "${DB_POSTGRESDB_PASSWORD}"
+      QUEUE_BULL_REDIS_HOST: "${QUEUE_BULL_REDIS_HOST}"
+      QUEUE_BULL_REDIS_PORT: "${QUEUE_BULL_REDIS_PORT}"
+      QUEUE_BULL_REDIS_PASSWORD: "${QUEUE_BULL_REDIS_PASSWORD}"
+
+      # N8N
+      N8N_HOST: "${N8N_HOST}"
+      WEBHOOK_URL: "${WEBHOOK_URL}"
+      N8N_LOG_LEVEL: "${N8N_LOG_LEVEL}"
+      GENERIC_TIMEZONE: "${GENERIC_TIMEZONE}"
+      N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: "${N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE}"
+
+      # Hardening
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: "${N8N_BASIC_AUTH_USER}"
+      N8N_BASIC_AUTH_PASSWORD: "${N8N_BASIC_AUTH_PASSWORD}"
+      # Se preferir hash bcrypt, ative a linha abaixo e troque a senha por um hash
+      # N8N_BASIC_AUTH_HASH: "true"
+      N8N_PUBLIC_API_DISABLED: "true"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+      N8N_SECURE_COOKIE: "true"
+      N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
+
     volumes:
       - n8n_data:/home/node/.n8n
       - ./temp:/home/node/temp
       - ./waha_media/default:/home/node/waha_media/default
-    ports:
-      - '5678:5678'
+    # Sem ports publicados, deixe o Coolify expor por FQDN e HTTPS
 
   waha:
     image: devlikeapro/waha-plus:latest
     platform: linux/amd64
+    restart: unless-stopped
     environment:
-      WHATSAPP_HOOK_URL: '${WAHA_WEBHOOK_URL}'
-      WHATSAPP_DEFAULT_ENGINE: '${WAHA_DEFAULT_ENGINE}'
-      WHATSAPP_HOOK_EVENTS: '${WAHA_HOOK_EVENTS}'
+      WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"
+      WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"
+      WHATSAPP_HOOK_EVENTS: "${WAHA_HOOK_EVENTS}"
+
+      # Hardening WAHA
+      WAHA_API_KEY: "sha512:${WAHA_API_KEY_SHA512}"
+      WHATSAPP_SWAGGER_ENABLED: "false"   # ou defina user e senha se quiser manter
+      WAHA_DASHBOARD_ENABLED: "false"     # idem
+      WAHA_API_KEY_EXCLUDE_PATH: "health" # opcional, libera /health sem chave
+
     volumes:
       - waha_sessions:/app/.sessions
-      - ./waha_media:/tmp/whatsapp-files 
-    ports:
-      - "3000:3000"
-      
+      - ./waha_media:/tmp/whatsapp-files
+    # Sem ports publicados, Coolify faz o proxy
+
 volumes:
   n8n_data:
   waha_sessions:
