@@ -4,7 +4,7 @@ services:
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      # Banco e Redis
+      # Banco e Redi
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: "${DB_POSTGRESDB_HOST}"
       DB_POSTGRESDB_PORT: "${DB_POSTGRESDB_PORT}"
