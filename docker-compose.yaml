@@ -43,22 +43,18 @@ services:
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      # Bind para fora do container
       HOST: "0.0.0.0"
       PORT: "3000"
 
-      # Engine + Webhook pro n8n
       WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"
       WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"
       WHATSAPP_HOOK_EVENTS: "${WAHA_HOOK_EVENTS}"
 
-      # Painel / Swagger
       WAHA_DASHBOARD_ENABLED: "true"
       WHATSAPP_SWAGGER_ENABLED: "true"
 
-      # Segurança da API
       WAHA_API_KEY: "sha512:${WAHA_API_KEY_SHA512}"
-      WAHA_API_KEY_EXCLUDE_PATH: "health"
+      WAHA_API_KEY_EXCLUDE_PATHS: "/health,/ping"  # << corrigido (plural + barras)
       WAHA_PRINT_QR: "false"
 
     volumes:
