@@ -40,7 +40,7 @@ services:
     # Sem ports publicados, deixe o Coolify expor por FQDN e HTTPS
 
   waha:
-    image: devlikeapro/waha-plus:latest
+    image: ghcr.io/devlikeapro/waha-plus:latest
     platform: linux/amd64
     restart: unless-stopped
     environment:
