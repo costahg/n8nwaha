@@ -39,25 +39,25 @@ services:
       - ./waha_media/default:/home/node/waha_media/default
     # Sem ports publicados, deixe o Coolify expor por FQDN e HTTPS
 
-  waha:
-    image: ghcr.io/devlikeapro/waha-plus:latest
-    platform: linux/amd64
-    restart: unless-stopped
-    environment:
-      WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"
-      WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"
-      WHATSAPP_HOOK_EVENTS: "${WAHA_HOOK_EVENTS}"
+waha:
+  image: devlikeapro/waha:latest   # <-- era devlikeapro/waha-plus:latest
+  platform: linux/amd64
+  restart: unless-stopped
+  environment:
+    WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"
+    WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"   # deixe GOWS; se não subir, mude para OPENWA
+    WHATSAPP_HOOK_EVENTS: "${WAHA_HOOK_EVENTS}"
 
-      # Hardening WAHA
-      WAHA_API_KEY: "sha512:${WAHA_API_KEY_SHA512}"
-      WHATSAPP_SWAGGER_ENABLED: "false"   # ou defina user e senha se quiser manter
-      WAHA_DASHBOARD_ENABLED: "false"     # idem
-      WAHA_API_KEY_EXCLUDE_PATH: "health" # opcional, libera /health sem chave
+    # Hardening (mantém!)
+    WAHA_API_KEY: "sha512:${WAHA_API_KEY_SHA512}"
+    WHATSAPP_SWAGGER_ENABLED: "false"
+    WAHA_DASHBOARD_ENABLED: "false"
+    WAHA_API_KEY_EXCLUDE_PATH: "health"
+    WAHA_PRINT_QR: "false"          # opcional, só pra não poluir logs
 
-    volumes:
-      - waha_sessions:/app/.sessions
-      - ./waha_media:/tmp/whatsapp-files
-    # Sem ports publicados, Coolify faz o proxy
+  volumes:
+    - waha_sessions:/app/.sessions
+    - ./waha_media:/tmp/whatsapp-files
 
 volumes:
   n8n_data:
