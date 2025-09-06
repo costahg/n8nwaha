@@ -22,6 +22,7 @@ services:
       GENERIC_TIMEZONE: "${GENERIC_TIMEZONE}"
       N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: "${N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE}"
       N8N_RUNNERS_ENABLED: "true"
+      N8N_TRUST_PROXY: "true"    # <<< corrige o X-Forwarded-For
 
       # Hardening
       N8N_BASIC_AUTH_ACTIVE: "true"
@@ -31,37 +32,38 @@ services:
       N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
       N8N_SECURE_COOKIE: "true"
       N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
+
     volumes:
       - n8n_data:/home/node/.n8n
       - ./temp:/home/node/temp
       - ./waha_media/default:/home/node/waha_media/default
 
   waha:
-    image: devlikeapro/waha:latest     
+    image: devlikeapro/waha:latest
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      # Bind pra fora do container (crucial pro proxy do Coolify)
+      # Bind para fora do container
       HOST: "0.0.0.0"
       PORT: "3000"
 
-      # Engine e webhook pro n8n
-      WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"  
-      WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"            
+      # Engine + Webhook pro n8n
+      WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"
+      WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"
       WHATSAPP_HOOK_EVENTS: "${WAHA_HOOK_EVENTS}"
 
-      # Painel e Swagger ATIVOS
+      # Painel / Swagger
       WAHA_DASHBOARD_ENABLED: "true"
       WHATSAPP_SWAGGER_ENABLED: "true"
 
-      # Segurança
+      # Segurança da API
       WAHA_API_KEY: "sha512:${WAHA_API_KEY_SHA512}"
-      WAHA_API_KEY_EXCLUDE_PATH: "${WAHA_API_KEY_EXCLUDE_PATH}"
+      WAHA_API_KEY_EXCLUDE_PATH: "health"
       WAHA_PRINT_QR: "false"
+
     volumes:
       - waha_sessions:/app/.sessions
       - ./waha_media:/tmp/whatsapp-files
-    # Sem ports; o Coolify publica via FQDN do serviço
 
 volumes:
   n8n_data:
