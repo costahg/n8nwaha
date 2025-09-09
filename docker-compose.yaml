@@ -40,14 +40,13 @@ services:
       - ./waha_media/default:/home/node/waha_media/default
 
   waha:
-    image: "${WAHA_IMAGE:-devlikeapro/waha:latest}" 
+    image: "${WAHA_IMAGE}"
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      HOST: "${WAHA_HOST}"
-      PORT: "${WAHA_PORT}"
-      SERVER_HOST: "${SERVER_HOST}"
-      NEST_HOST: "${NEST_HOST}"
+      # Bind correto (não usar HOST/PORT genéricos)
+      WHATSAPP_API_HOSTNAME: "${WHATSAPP_API_HOSTNAME}"
+      WHATSAPP_API_PORT: "${WHATSAPP_API_PORT}"
 
       # App
       WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"
@@ -57,14 +56,18 @@ services:
       WAHA_DASHBOARD_ENABLED: "${WAHA_DASHBOARD_ENABLED}"
       WHATSAPP_SWAGGER_ENABLED: "${WHATSAPP_SWAGGER_ENABLED}"
 
+      # Segurança
       WAHA_API_KEY: "sha512:${WAHA_API_KEY_SHA512}"
-      WAHA_API_KEY_EXCLUDE_PATHS: "${WAHA_API_KEY_EXCLUDE_PATHS}"
+      WAHA_API_KEY_EXCLUDE_PATH: "${WAHA_API_KEY_EXCLUDE_PATH}"
       WAHA_PRINT_QR: "${WAHA_PRINT_QR}"
+
     volumes:
       - waha_sessions:/app/.sessions
       - ./waha_media:/tmp/whatsapp-files
+
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://[::1]:3000/health || wget -qO- http://127.0.0.1:3000/health || exit 1"]
+      # /health agora responde 200 sem X-Api-Key
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:${WHATSAPP_API_PORT}/health >/dev/null 2>&1 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 6
