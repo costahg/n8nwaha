@@ -6,8 +6,7 @@ services:
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      # ---- Banco & Redis ----
-      DB_TYPE: "${DB_TYPE}"
+      DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: "${DB_POSTGRESDB_HOST}"
       DB_POSTGRESDB_PORT: "${DB_POSTGRESDB_PORT}"
       DB_POSTGRESDB_DATABASE: "${DB_POSTGRESDB_DATABASE}"
@@ -17,7 +16,6 @@ services:
       QUEUE_BULL_REDIS_PORT: "${QUEUE_BULL_REDIS_PORT}"
       QUEUE_BULL_REDIS_PASSWORD: "${QUEUE_BULL_REDIS_PASSWORD}"
 
-      # ---- n8n ----
       N8N_HOST: "${N8N_HOST}"
       N8N_PROTOCOL: "${N8N_PROTOCOL}"
       WEBHOOK_URL: "${WEBHOOK_URL}"
@@ -26,9 +24,7 @@ services:
       N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: "${N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE}"
       N8N_RUNNERS_ENABLED: "${N8N_RUNNERS_ENABLED}"
       N8N_TRUST_PROXY: "${N8N_TRUST_PROXY}"
-      NODE_ENV: "${NODE_ENV}"
 
-      # ---- Segurança ----
       N8N_BASIC_AUTH_ACTIVE: "${N8N_BASIC_AUTH_ACTIVE}"
       N8N_BASIC_AUTH_USER: "${N8N_BASIC_AUTH_USER}"
       N8N_BASIC_AUTH_PASSWORD: "${N8N_BASIC_AUTH_PASSWORD}"
@@ -37,19 +33,23 @@ services:
       N8N_SECURE_COOKIE: "${N8N_SECURE_COOKIE}"
       N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "${N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS}"
+      NODE_ENV: "${NODE_ENV}"
     volumes:
       - n8n_data:/home/node/.n8n
       - ./temp:/home/node/temp
       - ./waha_media/default:/home/node/waha_media/default
 
   waha:
-    image: ${WAHA_IMAGE}
+    image: "${WAHA_IMAGE:-devlikeapro/waha:latest}" 
     platform: linux/amd64
     restart: unless-stopped
     environment:
       HOST: "${WAHA_HOST}"
       PORT: "${WAHA_PORT}"
+      SERVER_HOST: "${SERVER_HOST}"
+      NEST_HOST: "${NEST_HOST}"
 
+      # App
       WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"
       WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"
       WHATSAPP_HOOK_EVENTS: "${WAHA_HOOK_EVENTS}"
@@ -63,8 +63,11 @@ services:
     volumes:
       - waha_sessions:/app/.sessions
       - ./waha_media:/tmp/whatsapp-files
-    expose:
-      - "${WAHA_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://[::1]:3000/health || wget -qO- http://127.0.0.1:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
 
 volumes:
   n8n_data:
