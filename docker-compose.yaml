@@ -1,11 +1,13 @@
+version: "3.9"
+
 services:
   n8n:
     build: .
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      # Banco e Redi
-      DB_TYPE: postgresdb
+      # ---- Banco & Redis ----
+      DB_TYPE: "${DB_TYPE}"
       DB_POSTGRESDB_HOST: "${DB_POSTGRESDB_HOST}"
       DB_POSTGRESDB_PORT: "${DB_POSTGRESDB_PORT}"
       DB_POSTGRESDB_DATABASE: "${DB_POSTGRESDB_DATABASE}"
@@ -15,51 +17,54 @@ services:
       QUEUE_BULL_REDIS_PORT: "${QUEUE_BULL_REDIS_PORT}"
       QUEUE_BULL_REDIS_PASSWORD: "${QUEUE_BULL_REDIS_PASSWORD}"
 
-      # n8n
+      # ---- n8n ----
       N8N_HOST: "${N8N_HOST}"
+      N8N_PROTOCOL: "${N8N_PROTOCOL}"
       WEBHOOK_URL: "${WEBHOOK_URL}"
       N8N_LOG_LEVEL: "${N8N_LOG_LEVEL}"
       GENERIC_TIMEZONE: "${GENERIC_TIMEZONE}"
       N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE: "${N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE}"
-      N8N_RUNNERS_ENABLED: "true"
-      N8N_TRUST_PROXY: "true"    # <<< corrige o X-Forwarded-For
+      N8N_RUNNERS_ENABLED: "${N8N_RUNNERS_ENABLED}"
+      N8N_TRUST_PROXY: "${N8N_TRUST_PROXY}"
+      NODE_ENV: "${NODE_ENV}"
 
-      # Hardening
-      N8N_BASIC_AUTH_ACTIVE: "true"
+      # ---- Segurança ----
+      N8N_BASIC_AUTH_ACTIVE: "${N8N_BASIC_AUTH_ACTIVE}"
       N8N_BASIC_AUTH_USER: "${N8N_BASIC_AUTH_USER}"
       N8N_BASIC_AUTH_PASSWORD: "${N8N_BASIC_AUTH_PASSWORD}"
-      N8N_PUBLIC_API_DISABLED: "true"
-      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
-      N8N_SECURE_COOKIE: "true"
+      N8N_PUBLIC_API_DISABLED: "${N8N_PUBLIC_API_DISABLED}"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "${N8N_BLOCK_ENV_ACCESS_IN_NODE}"
+      N8N_SECURE_COOKIE: "${N8N_SECURE_COOKIE}"
       N8N_ENCRYPTION_KEY: "${N8N_ENCRYPTION_KEY}"
-
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "${N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS}"
     volumes:
       - n8n_data:/home/node/.n8n
       - ./temp:/home/node/temp
       - ./waha_media/default:/home/node/waha_media/default
 
   waha:
-    image: devlikeapro/waha:latest
+    image: ${WAHA_IMAGE}
     platform: linux/amd64
     restart: unless-stopped
     environment:
-      HOST: "0.0.0.0"
-      PORT: "3000"
+      HOST: "${WAHA_HOST}"
+      PORT: "${WAHA_PORT}"
 
       WHATSAPP_DEFAULT_ENGINE: "${WAHA_DEFAULT_ENGINE}"
       WHATSAPP_HOOK_URL: "${WAHA_WEBHOOK_URL}"
       WHATSAPP_HOOK_EVENTS: "${WAHA_HOOK_EVENTS}"
 
-      WAHA_DASHBOARD_ENABLED: "true"
-      WHATSAPP_SWAGGER_ENABLED: "true"
+      WAHA_DASHBOARD_ENABLED: "${WAHA_DASHBOARD_ENABLED}"
+      WHATSAPP_SWAGGER_ENABLED: "${WHATSAPP_SWAGGER_ENABLED}"
 
       WAHA_API_KEY: "sha512:${WAHA_API_KEY_SHA512}"
-      WAHA_API_KEY_EXCLUDE_PATHS: "/health,/ping"  # << corrigido (plural + barras)
-      WAHA_PRINT_QR: "false"
-
+      WAHA_API_KEY_EXCLUDE_PATHS: "${WAHA_API_KEY_EXCLUDE_PATHS}"
+      WAHA_PRINT_QR: "${WAHA_PRINT_QR}"
     volumes:
       - waha_sessions:/app/.sessions
       - ./waha_media:/tmp/whatsapp-files
+    expose:
+      - "${WAHA_PORT}"
 
 volumes:
   n8n_data:
