@@ -71,7 +71,32 @@ services:
     expose:
       - "3000"
 
-    # Health interno do Docker -> usa /ping (200 sem auth)
+  postiz:
+    image: ghcr.io/gitroomhq/postiz-app:latest
+    restart: unless-stopped
+    environment:
+      MAIN_URL: "https://pos.lizapeproprio.shop"
+      FRONTEND_URL: "https://pos.lizapeproprio.shop"
+      NEXT_PUBLIC_BACKEND_URL: "https://pos.lizapeproprio.shop/api"
+
+      JWT_SECRET: ${POSTIZ_JWT_SECRET}
+
+      DATABASE_URL: ${POSTIZ_DATABASE_URL}
+      REDIS_URL: ${POSTIZ_REDIS_URL}
+
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      IS_GENERAL: "true"
+
+      STORAGE_PROVIDER: "local"
+      UPLOAD_DIRECTORY: "/uploads"
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
+
+    volumes:
+      - postiz_config:/config
+      - postiz_uploads:/uploads
+    expose:
+      - "5000"
+
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:${WHATSAPP_API_PORT}/ping >/dev/null 2>&1 || exit 1"]
       interval: 10s
