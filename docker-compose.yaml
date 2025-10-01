@@ -67,11 +67,10 @@ services:
       - waha_sessions:/app/.sessions
       - ./waha_media:/tmp/whatsapp-files
 
-    # Anuncia a porta interna pro Traefik do Coolify
+    pull_policy: missing
     expose:
       - "3000"
 
-    # Health interno do Docker -> usa /ping (200 sem auth)
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:${WHATSAPP_API_PORT}/ping >/dev/null 2>&1 || exit 1"]
       interval: 10s
